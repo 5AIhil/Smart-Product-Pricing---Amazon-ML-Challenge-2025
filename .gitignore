@@ -1,0 +1,4 @@
+# Ignore large embedding files
+*.npz
+test-embeding/
+train-embeding/
