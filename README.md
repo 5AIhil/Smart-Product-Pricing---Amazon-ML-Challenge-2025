@@ -18,39 +18,44 @@ This project predicts product prices based on multi-modal data (text and images)
 
 ```mermaid
 graph TD
-    A[Raw Training Data <br> train.csv] --> B[Dataset Splitter <br> dataset-split-code.ipynb]
-    B --> C1[Shard 0 CSV]
-    B --> C2[Shard 1 CSV]
-    B --> C3[Shard N CSV]
-    
-    C1 --> D1
-    C2 --> D2
-    C3 --> DN
-    
-    subgraph "Embedding Generation : crate-embeddings.ipynb"
-        D1[Generate Text & Image Embeddings <br> BGE-small / SigLIP]
-        D2[Generate Text & Image Embeddings]
-        DN[Generate Text & Image Embeddings]
+    subgraph Data Source
+        TrainData[Raw Training Data <br> train.csv]
+        TestData[Raw Test Data <br> test.csv]
+    end
+
+    subgraph Split Phase <br> dataset-split-code.ipynb
+        TrainData --> Split[Dataset Splitter]
+        TestData --> Split
+        
+        Split --> TS0[Train Shard 0/..N]
+        Split --> TS1[Test Shard 0/..N]
     end
     
-    D1 --> E1[shard_0.npz]
-    D2 --> E2[shard_1.npz]
-    DN --> EN[shard_N.npz]
+    subgraph "Embedding Generation : crate-embeddings.ipynb"
+        TS0 --> EmbT[Generate Text & Image Embeddings <br> BGE-small / SigLIP]
+        TS1 --> EmbT
+    end
     
-    E1 --> F
-    E2 --> F
-    EN --> F
+    subgraph Aggregation Phase <br> aggregator-code.ipynb
+        EmbT --> TrainNPZ[Train shard_0..N.npz]
+        EmbT --> TestNPZ[Test shard_0..N.npz]
+        
+        TrainNPZ --> Agg[Aggregator]
+        TestNPZ --> Agg
+        
+        Agg --> AggTrain[aggregated_embeddings.npz]
+        Agg --> AggTest[all_embeddings_aggregated.npz]
+    end
     
-    F[Aggregator <br> aggregator-code.ipynb] --> G[all_embeddings_aggregated.npz]
-    
-    G --> H[Model Training <br> amazon-final-notebook.ipynb]
-    H --> I[LightGBM Model <br> model-amazon]
-    
-    J[Raw Test Data <br> test.csv] --> K[Embedding Generation]
-    K --> L[test_embeddings.npz]
-    L --> M[Model Inference <br> amazon-final-notebook.ipynb]
-    I --> M
-    M --> N[submission.csv]
+    subgraph Model & Inference <br> amazon-final-notebook.ipynb
+        AggTrain --> TrainMod[Model Training <br> LGBM]
+        TrainMod --> Model[LightGBM Weights <br> model-amazon]
+        
+        AggTest --> Inference[Model Inference]
+        Model --> Inference
+        
+        Inference --> Sub[submission.csv]
+    end
 ```
 
 ## Pipeline Components
