@@ -54,13 +54,13 @@ graph TD
 ```
 
 ## Pipeline Components
-1. **Dataset Splitter (`dataset-split-code.ipynb`)**: Preprocesses `train.csv` by cleaning text content, handling constraints, and splitting the massive dataset into smaller CSV shards for parallel processing.
+1. **Dataset Splitter (`dataset-split-code.ipynb`)**: Preprocesses `train.csv` (and `test.csv` in identical fashion) by cleaning text content, handling constraints, and splitting the massive datasets into smaller CSV shards for parallel processing.
 2. **Embedding Creator (`crate-embeddings.ipynb`)**: Processes each shard to extract dense feature representations. 
    - **Text**: Uses `BAAI/bge-small-en-v1.5` via `sentence-transformers`.
    - **Images**: Uses `google/siglip-base-patch16-224` (SigLIP) to extract vision embeddings.
-   - Outputs `.npz` files containing `ids`, `text`, `image`, and `price` arrays.
-3. **Aggregator (`aggregator-code.ipynb`)**: Merges all sharded `.npz` files into a single, unified `all_embeddings_aggregated.npz` dataset.
-4. **Final Model (`amazon-final-notebook.ipynb`)**: Trains a LightGBM Regressor on the aggregated multi-modal embeddings to predict `price`. Evaluates using SMAPE and generates the final `submission.csv` on the test data.
+   - Outputs `.npz` files containing `ids`, `text`, `image`, and (if training) `price` arrays.
+3. **Aggregator (`aggregator-code.ipynb`)**: Merges all training sharded `.npz` files into a single `aggregated_embeddings.npz` and does the same for the test shards into `all_embeddings_aggregated.npz` datasets.
+4. **Final Model (`amazon-final-notebook.ipynb`)**: Loads both the training arrays and test arrays. Trains a tightly-tuned LightGBM Regressor on the aggregated multi-modal embeddings using 5-Fold Cross Validation. Predicts on the test set and exports `submission.csv`.
 
 ## Hardware Constraints & Model Selection
 Due to severe GPU memory and compute constraints during the hackathon, we could not rely on massive foundation models (like large LLMs or huge Vision Transformers) for feature extraction. Instead, we strategically selected highly optimized, parameter-efficient models that deliver top-tier performance without bottlenecking our limited hardware:
