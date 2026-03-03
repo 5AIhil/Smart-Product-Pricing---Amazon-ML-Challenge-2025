@@ -27,7 +27,7 @@ graph TD
     C2 --> D2
     C3 --> DN
     
-    subgraph Embedding Generation <br> crate-embeddings.ipynb
+    subgraph "Embedding Generation : crate-embeddings.ipynb"
         D1[Generate Text & Image Embeddings <br> BGE-small / SigLIP]
         D2[Generate Text & Image Embeddings]
         DN[Generate Text & Image Embeddings]
