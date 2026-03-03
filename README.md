@@ -23,7 +23,7 @@ graph TD
         TestData[Raw Test Data <br> test.csv]
     end
 
-    subgraph Split Phase <br> dataset-split-code.ipynb
+    subgraph "Split Phase : dataset-split-code.ipynb"
         TrainData --> Split[Dataset Splitter]
         TestData --> Split
         
@@ -36,7 +36,7 @@ graph TD
         TS1 --> EmbT
     end
     
-    subgraph Aggregation Phase <br> aggregator-code.ipynb
+    subgraph "Aggregation Phase : aggregator-code.ipynb"
         EmbT --> TrainNPZ[Train shard_0..N.npz]
         EmbT --> TestNPZ[Test shard_0..N.npz]
         
@@ -47,7 +47,7 @@ graph TD
         Agg --> AggTest[all_embeddings_aggregated.npz]
     end
     
-    subgraph Model & Inference <br> amazon-final-notebook.ipynb
+    subgraph "Model & Inference : amazon-final-notebook.ipynb"
         AggTrain --> TrainMod[Model Training <br> LGBM]
         TrainMod --> Model[LightGBM Weights <br> model-amazon]
         
